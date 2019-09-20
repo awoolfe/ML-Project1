@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 class Logistic():
@@ -6,10 +8,12 @@ class Logistic():
         self.labels = labels
         self.data = data
 
-    def sigmoid(z): 
     """
-    sigmoid function 
+        sigmoid function 
     """
+    def sigmoid(z):
         return 1./(1.+math.exp(-z))
+
+
     def predict(X, yhat, threshhold= 0.5):
         
