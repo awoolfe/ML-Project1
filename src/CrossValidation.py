@@ -11,7 +11,7 @@ import numpy as np
 # Input:
 # data - the data set
 # model - model to train
-# k - number of folds
+# fold - number of folds
 def CrossValidation(data, model, fold):
     folds = np.split(data, fold)  # we separate the data set into k different sub lists
     for i in range(fold):
