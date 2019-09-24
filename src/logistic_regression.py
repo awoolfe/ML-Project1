@@ -1,5 +1,5 @@
 import math
-
+from scipy.special import expit
 import numpy as np
 
 class Logistic:
@@ -16,12 +16,13 @@ class Logistic:
 #        return 1./(1.+math.exp(-z))
 
 
-    def loglikelihood(self, X, y):
+    def loglikelyhood(self, X, y):
         sum_ = 0
         weights = self.weights
+
         for i in range(len(X)):
-            sig = np.dot(weights, x[i].T)
-            sum_ += y[i]*np.log(self.sigmoid(sig))+ (1-y[i])*np.log(1-sig)
+            sig = self.sigmoid(np.dot(weights.T,X[i]))
+            sum_ += y[i]*np.log(sig)+ (1-y[i])*np.log(1-sig)
         return sum_
     def sigmoid(self,x):
         """
@@ -48,23 +49,27 @@ class Logistic:
             the learning rate ("alpha")
 
         """
-        m = X.shape[0]
-        n = X.shape[1]
-        assert(n == y.shape[0], "the data and output array shapes are not equal")
+#        X = np.insert(X, 0, 1, axis=1)
+
+        #assert(n == y.shape[0], "the data and output array shapes are not equal")
         
         weights = self.weights
         
+        print(X.shape, y.shape, weights.shape)
         #it = 0
         
         for i in range(iterations):
             sum_ = 0.
             for j,row in enumerate(X):
-                print(np.dot(weights,row.T))
                 sig = self.sigmoid(np.dot(weights, row.T))
                 sum_ += row * (y[j] - sig)
-            weights = weights + lr*sum_
-        
-        self.weights = weights
+            
+            weights += lr*sum_
+
+
+            self.weights = weights
+            print(self.loglikelyhood(X,y))    
+        print('weights: ',self.weights)
 
     def predict(self, X, threshhold= 0.5):
         z = np.dot(X,self.weights)
@@ -82,9 +87,10 @@ if __name__ == '__main__':
     wine,wine_headers = load_files.load_wine()
     X = wine[:,:-1]
     y = wine[:,-1]
-
+    
+    print(X.shape, y.shape)
     model = Logistic(X.shape[1])
     model.fit(X,y,100)
-
+    
 
 

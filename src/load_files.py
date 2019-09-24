@@ -17,7 +17,8 @@ def load_wine(wine_data_path ='../data/winequality-red.csv', preprocess = 1):
                 i[-1] = 1
             else:
                 i[-1] = 0
-    return wines, wine_headers
+    wines[:,:-1] = normalize(np.copy(wines[:,:-1]))
+    return normalize(wines), wine_headers
 
 
 def load_cancer(breast_cancer_data_path = '../data/breast-cancer-wisconsin.data' , preprocess = 1):
@@ -43,8 +44,21 @@ def load_cancer(breast_cancer_data_path = '../data/breast-cancer-wisconsin.data'
             else:
                 print('Something weird. Check cancer data.',i)
     # return list into numpy array
-        cancer = np.asarray(cancer_good)
-    
+    cancer = np.asarray(cancer_good)
+    cancer[:,:-1] = normalize(np.copy(cancer[:,:-1]))
+
     return cancer, cancer_headers
+
+def normalize(arr,axis = 0):
+    """
+    normalize (put in range [0,1]) ane array along an axis
+
+    """
+    min = arr.min(axis=axis) 
+    minus_arr = arr.T - min[:,np.newaxis]
+
+    norm_arr = minus_arr / minus_arr.T.max(axis =axis)[:,np.newaxis]
+    return norm_arr.T
+
 
 
