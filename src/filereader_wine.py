@@ -2,8 +2,10 @@ import numpy as np
 import csv
 import pandas as fb
 import matplotlib.pyplot as plt
+wine_path = '../data/winequality-red.csv'
 
-with open ('../data/winequality-red.csv', 'r') as f:
+
+with open (wine_path, 'r') as f:
     wines = list(csv.reader(f, delimiter=';'))
     wines_attributes = wines[0]
     wines = np.array(wines[1:], dtype=np.float)
