@@ -8,7 +8,7 @@ class Logistic:
         initialize random weights
         params is the number of parameters
         """
-        self.weights = np.random.rand(params)
+        self.weights = np.random.rand(params+1)
 #    def sigmoid(self,z):
 #        """
 #        sigmoid function 
@@ -37,7 +37,7 @@ class Logistic:
             # zero because it's 1+z.
             z = np.exp(x)
             return z / (1 + z)   
-    def fit(self, X, y, iterations, lr = 0.1):
+    def fit(self, X, y, iterations, lr = 0.004):
         """
         Parameters
         ----------
@@ -49,7 +49,7 @@ class Logistic:
             the learning rate ("alpha")
 
         """
-#        X = np.insert(X, 0, 1, axis=1)
+        X = np.insert(X, 0, 1, axis=1)
 
         #assert(n == y.shape[0], "the data and output array shapes are not equal")
         
@@ -59,21 +59,21 @@ class Logistic:
         #it = 0
         
         for i in range(iterations):
-            sum_ = 0.
+            sum_ = np.zeros((len(weights),))
             for j,row in enumerate(X):
                 sig = self.sigmoid(np.dot(weights, row.T))
-                sum_ += row * (y[j] - sig)
+                sum_ += np.multiply(row, (y[j] - sig))
             
-            weights += lr*sum_
+            weights += np.multiply(sum_, lr/np.round(np.log10(i),0) if i > 10 else lr)
 
 
             self.weights = weights
-            print(self.loglikelyhood(X,y))    
+            print(self.loglikelyhood(X,y))
         print('weights: ',self.weights)
 
     def predict(self, X, threshhold= 0.5):
         z = np.dot(X,self.weights)
-        prob = sigmoid(z)
+        prob = self.sigmoid(z)
         
         return [1 if i > 0.5 else 0 for i in prob]   
 
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     
     print(X.shape, y.shape)
     model = Logistic(X.shape[1])
-    model.fit(X,y,100)
+    model.fit(X,y,10000)
     
 
 
