@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     #print(X.shape, y.shape)
     model = LDA(0,0)
-    print(CrossValidation.CrossValidation(X, model, 5))
+    print(CrossValidation.CrossValidation(wine, model, 5))
     # model.fit(X, y)
 
     #print(eval.evaluate_acc(y, model.predict(X)))
