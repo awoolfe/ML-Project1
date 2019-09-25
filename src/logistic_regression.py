@@ -3,12 +3,14 @@ from scipy.special import expit
 import numpy as np
 
 class Logistic:
-    def __init__(self,params):
+    def __init__(self,params, iterations):
         """
         initialize random weights
         params is the number of parameters
+        iterations is how many time we do gradiant descent
         """
         self.weights = np.random.rand(params+1)
+        self.iterations = iterations
 #    def sigmoid(self,z):
 #        """
 #        sigmoid function 
@@ -37,7 +39,7 @@ class Logistic:
             # zero because it's 1+z.
             z = np.exp(x)
             return z / (1 + z)   
-    def fit(self, X, y, iterations, lr = 0.004):
+    def fit(self, X, y, lr = 0.004):
         """
         Parameters
         ----------
@@ -58,7 +60,7 @@ class Logistic:
         print(X.shape, y.shape, weights.shape)
         #it = 0
         
-        for i in range(iterations):
+        for i in range(self.iterations):
             sum_ = np.zeros((len(weights),))
             for j,row in enumerate(X):
                 sig = self.sigmoid(np.dot(weights, row.T))
@@ -68,12 +70,15 @@ class Logistic:
 
 
             self.weights = weights
-            print(self.loglikelyhood(X,y))
+            #print(self.loglikelyhood(X,y))
         print('weights: ',self.weights)
 
     def predict(self, X, threshhold= 0.5):
-        z = np.dot(X,self.weights)
-        prob = self.sigmoid(z)
+        X0 = np.zeros((X.shape[0]))
+        X0[X0 == 0] = 1
+        X_prime = np.concatenate((X0[:, np.newaxis], X),axis=1)
+        z = np.dot(X_prime,self.weights)
+        prob = [self.sigmoid(a) for a in z]
         
         return [1 if i > 0.5 else 0 for i in prob]   
 
@@ -83,14 +88,15 @@ class Logistic:
         #    return 0
 
 if __name__ == '__main__':
-    import load_files 
+    import load_files
+    import CrossValidation
     wine,wine_headers = load_files.load_wine()
     X = wine[:,:-1]
     y = wine[:,-1]
     
     print(X.shape, y.shape)
-    model = Logistic(X.shape[1])
-    model.fit(X,y,10000)
+    model = Logistic(X.shape[1], 1000)
+    print(CrossValidation.CrossValidation(wine, model, 5))
     
 
 
