@@ -62,15 +62,18 @@ class LDA():
 if __name__ == '__main__':
     import load_files
     import eval
+    import CrossValidation
+
     wine, wine_headers = load_files.load_wine()
     X = wine[:, :-1]
     y = wine[:, -1]
 
     #print(X.shape, y.shape)
     model = LDA(0,0)
-    model.fit(X, y)
+    print(CrossValidation.CrossValidation(X, model, 5))
+    # model.fit(X, y)
 
-    print(eval.evaluate_acc(y, model.predict(X)))
+    #print(eval.evaluate_acc(y, model.predict(X)))
     #test with sklearn
     # clf = LinearDiscriminantAnalysis()
     # clf.fit(X, y)
