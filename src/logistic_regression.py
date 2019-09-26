@@ -3,16 +3,13 @@ from scipy.special import expit
 import numpy as np
 
 class Logistic:
-    def __init__(self,params, iterations, lr, lr_func):
+    def __init__(self,params):
         """
         initialize random weights
         params is the number of parameters
         iterations is how many time we do gradiant descent
         """
         self.weights = np.random.rand(params)
-        self.iterations = iterations
-        self.lr = lr
-        self.lr_func = lr_func
 #    def sigmoid(self,z):
 #        """
 #        sigmoid function 
@@ -41,7 +38,7 @@ class Logistic:
             # zero because it's 1+z.
             z = np.exp(x)
             return z / (1 + z)   
-    def fit(self, X, y):
+    def fit(self, X, y, iterations, lr,lr_func):
         """
         Parameters
         ----------
@@ -49,9 +46,14 @@ class Logistic:
             The data
         Y: np.array (m x 1))
             The training output data were fitting to
-        lr: float
-            the learning rate ("alpha")
-
+        
+        params: List
+            iterations: int
+                the number of iterations to run the fit function
+            lr: float
+                the learning rate ("alpha")
+            lr_func: lambda func
+                a function that will be used to update the learning rate at every iteration
         """
         X = np.insert(X, 0, 1, axis=1)
 
@@ -62,13 +64,13 @@ class Logistic:
         #print(X.shape, y.shape, weights.shape)
         #it = 0
         
-        for i in range(self.iterations):
+        for i in range(iterations):
             sum_ = np.zeros((len(weights),))
             for j,row in enumerate(X):
                 sig = self.sigmoid(np.dot(weights, row.T))
                 sum_ += np.multiply(row, (y[j] - sig)) 
             
-            weights += np.multiply(sum_, self.lr_func(self.lr, i))
+            weights += np.multiply(sum_, lr_func(lr, i))
 
 
             self.weights = weights
@@ -96,7 +98,7 @@ if __name__ == '__main__':
     X = wine[:,:-1]
     y = wine[:,-1]
     print(X.shape, y.shape)
-    model = Logistic(X.shape[1], 10000)
+    model = Logistic(X.shape[1])
     #print(CrossValidation.CrossValidation(wine, model, 5))
 
     cancer, cancer_header = load_files.load_cancer()
