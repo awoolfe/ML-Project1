@@ -93,10 +93,15 @@ if __name__ == '__main__':
     wine,wine_headers = load_files.load_wine()
     X = wine[:,:-1]
     y = wine[:,-1]
-    
     print(X.shape, y.shape)
-    model = Logistic(X.shape[1], 1000)
-    print(CrossValidation.CrossValidation(wine, model, 5))
+    model = Logistic(X.shape[1], 10000)
+    #print(CrossValidation.CrossValidation(wine, model, 5))
+
+    cancer, cancer_header = load_files.load_cancer()
+
+    x = cancer[:,:-1]
+    model2 = Logistic(x.shape[1], 1000)
+    print(CrossValidation.CrossValidation(cancer, model2, 5))
     
 
 
