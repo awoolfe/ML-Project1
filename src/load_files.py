@@ -18,6 +18,7 @@ def load_wine(wine_data_path ='../data/winequality-red.csv', preprocess = 1):
             else:
                 i[-1] = 0
     wines[:,:-1] = normalize(np.copy(wines[:,:-1]))
+    print(np.corrcoef(wines, rowvar=False))
     return wines, wine_headers
 
 
