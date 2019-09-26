@@ -5,7 +5,7 @@
 #########################################################
 
 import numpy as np
-import eval
+import src.eval
 
 
 # This is where we run the training and validation steps of our model
@@ -23,5 +23,5 @@ def CrossValidation(data, model, fold):
                 trainingset = np.concatenate((trainingset, folds[j]))  # we create our training set by adding everysub lists except the ith one used for validation
         model.fit(trainingset[:,:-1], trainingset[:,-1])  # train the model with the training set
         predictions = model.predict(folds[i][:,:-1])  # predict using validation set
-        accuracy += eval.evaluate_acc(folds[i][:,-1], predictions)
+        accuracy += src.eval.evaluate_acc(folds[i][:,-1], predictions)
     return accuracy / fold

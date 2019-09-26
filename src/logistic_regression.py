@@ -3,14 +3,16 @@ from scipy.special import expit
 import numpy as np
 
 class Logistic:
-    def __init__(self,params, iterations):
+    def __init__(self,params, iterations, lr, lr_func):
         """
         initialize random weights
         params is the number of parameters
         iterations is how many time we do gradiant descent
         """
-        self.weights = np.random.rand(params+1)
+        self.weights = np.random.rand(params)
         self.iterations = iterations
+        self.lr = lr
+        self.lr_func = lr_func
 #    def sigmoid(self,z):
 #        """
 #        sigmoid function 
@@ -39,7 +41,7 @@ class Logistic:
             # zero because it's 1+z.
             z = np.exp(x)
             return z / (1 + z)   
-    def fit(self, X, y, lr = 0.004):
+    def fit(self, X, y):
         """
         Parameters
         ----------
@@ -57,7 +59,7 @@ class Logistic:
         
         weights = self.weights
         
-        print(X.shape, y.shape, weights.shape)
+        #print(X.shape, y.shape, weights.shape)
         #it = 0
         
         for i in range(self.iterations):
@@ -66,12 +68,12 @@ class Logistic:
                 sig = self.sigmoid(np.dot(weights, row.T))
                 sum_ += np.multiply(row, (y[j] - sig))
             
-            weights += np.multiply(sum_, lr/np.round(np.log10(i),0) if i > 10 else lr)
+            weights += np.multiply(sum_, self.lr_func(self.lr, i))
 
 
             self.weights = weights
             #print(self.loglikelyhood(X,y))
-        print('weights: ',self.weights)
+        #print('weights: ',self.weights)
 
     def predict(self, X, threshhold= 0.5):
         X0 = np.zeros((X.shape[0]))

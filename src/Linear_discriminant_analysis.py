@@ -36,7 +36,7 @@ class LDA():
                     #print(np.shape(np.transpose(row-means[k])))
                     covariance += np.multiply((row - means[k]),((row - means[k])[np.newaxis]).T)
         covariance = covariance/(total-2)
-        print(np.shape(covariance))
+        #print(np.shape(covariance))
         try:
             cov_inv = np.linalg.inv(covariance)
         except np.linalg.LinAlgError:
@@ -54,7 +54,7 @@ class LDA():
         for i in X:
             prediction.append(self.w0 + np.transpose(i).dot(self.w))
         y = [1 if i > 0 else 0 for i in prediction]
-        print(y)
+        #print(y)
         return y
 
 
