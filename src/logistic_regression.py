@@ -57,6 +57,7 @@ class Logistic:
         """
         X = np.insert(X, 0, 1, axis=1)
 
+        self.weights = np.random.rand(np.shape(self.weights)[0])
         #assert(n == y.shape[0], "the data and output array shapes are not equal")
         
         weights = self.weights

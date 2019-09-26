@@ -28,7 +28,7 @@ class LogisticRegular:
 
         for i in range(len(X)):
             sig = self.sigmoid(np.dot(weights.T, X[i]))
-            sum_ += y[i] * np.log(sig) + (1 - y[i]) * np.log(1 - sig)
+            sum_ += y[i] * np.log(sig) + (1 - y[i]) * np.log(1 - sig) + self.lam*(self.sign(weights))
         return sum_
 
     def sigmoid(self, x):
@@ -61,11 +61,12 @@ class LogisticRegular:
 
         # assert(n == y.shape[0], "the data and output array shapes are not equal")
 
+        self.weights = np.random.rand(np.shape(self.weights)[0])
         weights = self.weights
 
-        print(X.shape, y.shape, weights.shape)
+        #print(X.shape, y.shape, weights.shape)
         # it = 0
-
+        #print(weights)
         for i in range(self.iterations):
             sum_ = np.zeros((len(weights),))
             for j, row in enumerate(X):
@@ -74,19 +75,18 @@ class LogisticRegular:
 
 
             weights += np.multiply(sum_, self.lr_func(self.lr, i))
-            for k in weights:
-                k += self.lam*(self.sign(k))
+            # for k in weights:
+            #     k += self.lam*(self.sign(k))
             self.weights = weights
             # print(self.loglikelyhood(X,y))
-        # print('weights: ',self.weights)
+        print('weights: ',self.weights)
 
     def sign(self, weights):
-        if weights>0:
-            return 1
-        elif weights<0:
-            return -1
-        else:
-            return 0
+        #print(weights)
+        weights[weights<0] = -1
+        weights[weights>0] = 1
+        #print(weights)
+        return weights
 
     def predict(self, X, threshhold=0.5):
         X0 = np.zeros((X.shape[0]))
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     #X = wines[:, :-1]
     #y = wines[:, -1]
     #print(X.shape, y.shape)
-    model = LogisticRegular(wines.shape[1], 1000, 0.004, lambda x, y: x, 11)
+    model = LogisticRegular(wines.shape[1], 1000, 0.004, (lambda x, y: x), 0.1)
     print(CrossValidation.CrossValidation(wines, model, 5))
 
     # cancer, cancer_header = load_files.load_cancer()
