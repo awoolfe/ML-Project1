@@ -63,18 +63,19 @@ class LogisticRegular:
 
         weights = self.weights
 
-        # print(X.shape, y.shape, weights.shape)
+        print(X.shape, y.shape, weights.shape)
         # it = 0
 
         for i in range(self.iterations):
             sum_ = np.zeros((len(weights),))
             for j, row in enumerate(X):
                 sig = self.sigmoid(np.dot(weights, row.T))
-                sum_ += np.multiply(row, (y[j] - sig)) + self.lam*(self.sign(weights))
+                sum_ += np.multiply(row, (y[j] - sig))
 
 
             weights += np.multiply(sum_, self.lr_func(self.lr, i))
-
+            for k in weights:
+                k += self.lam*(self.sign(k))
             self.weights = weights
             # print(self.loglikelyhood(X,y))
         # print('weights: ',self.weights)
@@ -106,17 +107,17 @@ if __name__ == '__main__':
     import load_files
     import CrossValidation
 
-    wine, wine_headers = load_files.load_wine()
-    X = wine[:, :-1]
-    y = wine[:, -1]
-    print(X.shape, y.shape)
-    model = LogisticRegular(X.shape[1], 10000)
-    # print(CrossValidation.CrossValidation(wine, model, 5))
+    wines, wine_headers = load_files.load_wine()
+    #X = wines[:, :-1]
+    #y = wines[:, -1]
+    #print(X.shape, y.shape)
+    model = LogisticRegular(wines.shape[1], 1000, 0.004, lambda x, y: x, 11)
+    print(CrossValidation.CrossValidation(wines, model, 5))
 
-    cancer, cancer_header = load_files.load_cancer()
-
-    x = cancer[:, :-1]
-    model2 = LogisticRegular(x.shape[1], 1000)
-    print(CrossValidation.CrossValidation(cancer, model2, 5))
-
-
+    # cancer, cancer_header = load_files.load_cancer()
+    #
+    # x = cancer[:, :-1]
+    # model2 = LogisticRegular(x.shape[1], 1000)
+    # print(CrossValidation.CrossValidation(cancer, model2, 5))
+    #
+    #
