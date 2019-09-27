@@ -1,8 +1,9 @@
 import sys
 sys.path.append('/Users/ianbenlolo/Desktop/Mcgill/comp_551/ML-Project1/')
-import src.load_files
-import src.Linear_discriminant_analysis
-import src.logistic_regression
+
+import load_files
+import Linear_discriminant_analysis
+import logistic_regression
 import time
 import numpy as np
 # This is where we evaluate the accuracy of our models
@@ -28,6 +29,44 @@ def evaluate_acc(target_y, true_y):
 # data - the data set
 # model - model to train
 # fold - number of folds
+
+
+def get_uncorrelated_dataset(data,data_headers, threshold = 0.6):
+    
+    # get correlation coefficient matrix using numpy
+    corrcoefficients = np.corrcoef(data[:,:-1], rowvar = False)
+    
+#   save dictionary of correlated item with absolute threshhold
+    d= {}
+    for i in range(len(corrcoefficients)):
+        for j in range(len(corrcoefficients)- i):
+            if  np.abs(corrcoefficients[i][j+i]) > threshold:
+
+                if i in d:
+                    d[i].append(data_headers[j+i])
+                else:
+                    d[i] = []
+#   save the headers which we want to remove
+    headers_to_rem = []
+    s = set(data_headers)
+    print('d: ', d)
+    for key, value in d.items():
+        if len(value) > 0:
+            headers_to_rem.append(data_headers[key])
+        #for i in value:
+        #    headers_to_rem.append(i)
+    headers_to_rem = set(headers_to_rem)
+    print('to remove: ', headers_to_rem)
+    #remove the headers and store index of uncorrelated items
+    #this includes the last column with the classification
+    indeces_to_keep = []
+    for item in s.difference(headers_to_rem):
+        indeces_to_keep.append(data_headers.index(item))
+#    indeces_to_keep =[1,2,3,4,6,7,8,9,10,11] 
+    #return the array containing only the uncorrelated params
+    return  np.take(data, sorted(indeces_to_keep),axis = 1)
+
+
 def CrossValidation(data, model, fold, params = None):
     folds = np.array_split(data, fold, axis=0)  # we separate the data set into k different sub lists
     accuracy = 0
@@ -40,7 +79,6 @@ def CrossValidation(data, model, fold, params = None):
             assert(len(params) == 3, 'params should have iterations, lr, lr_func')
         else:
             params = []
-
         model.fit(trainingset[:,:-1], trainingset[:,-1], *params)  # train the model with the training set
 
         predictions = model.predict(folds[i][:,:-1])  # predict using validation set
@@ -48,16 +86,23 @@ def CrossValidation(data, model, fold, params = None):
     return accuracy / fold
 
 def main():
-    wines, wine_headers = src.load_files.load_wine()
-    cancer = src.load_files.load_cancer()
+    wines, wine_headers = load_files.load_wine()
+    cancer = load_files.load_cancer()
+    print('wines pre uncorrelation: ', wines.shape)
+    ## testing uncorrelated data only
+    wines = get_uncorrelated_dataset(wines,wine_headers)
+    print('wines post uncorrelation: ', wines.shape)
+    print(wines)
 
-    model_lda_wine1 = src.Linear_discriminant_analysis.LDA(0,0)
+    model_lda_wine1 = Linear_discriminant_analysis.LDA(0,0)
+    
 
-    model_linear_regression_wine1 = src.logistic_regression.Logistic(wines.shape[1])
-    params1 = [1000, 0.004, lambda x, y: x]
+    model_linear_regression_wine1 = logistic_regression.Logistic(wines.shape[1])
+    params1 = [1000, 0.004, lambda x, y: x, 0.05]
 
-    model_linear_regression_wine2 = src.logistic_regression.Logistic(wines.shape[1])
-    params2 = [1000, 0.004,  lambda x, y: x/np.round(np.log10(y),0) if y > 10 else x]
+
+    model_linear_regression_wine2 = logistic_regression.Logistic(wines.shape[1])
+    params2 = [1000, 0.004,  lambda x, y: x/np.round(np.log10(y),0) if y > 10 else x, 0.5]
 
     print('*******Runtime and accuracy of our models*******')
     print('Linear Discriminant Analysis')
