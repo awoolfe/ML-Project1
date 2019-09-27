@@ -61,20 +61,24 @@ class LDA():
 
 if __name__ == '__main__':
     import load_files
-    import eval
-    import CrossValidation
+    import utils
+    import timeit
+
+    start = timeit.default_timer()
 
     wine, wine_headers = load_files.load_wine()
     X = wine[:, :-1]
     y = wine[:, -1]
 
-    #print(X.shape, y.shape)
-    model = LDA(0,0)
-    print(CrossValidation.CrossValidation(wine, model, 5))
+    # print(X.shape, y.shape)
+    model = LDA(0, 0)
+    print(utils.CrossValidation(wine, model, 5))
     # model.fit(X, y)
+    stop = timeit.default_timer()
 
-    #print(eval.evaluate_acc(y, model.predict(X)))
-    #test with sklearn
+    print('Time: ', stop - start)
+    # print(eval.evaluate_acc(y, model.predict(X)))
+    # test with sklearn
     # clf = LinearDiscriminantAnalysis()
     # clf.fit(X, y)
     # print(clf.score(X,y))

@@ -62,28 +62,36 @@ class LDA():
         for i in X:
             y = []
             y.append(self.w0Y0 + np.transpose(i).dot(self.wY0))
+
             y.append(self.w0Y1 + np.transpose(i).dot(self.wY1))
-        y = [1 if i > 0 else 0 for i in prediction]
+            prediction.append(y)
+
         #print(y)
-        return y
+        return [0 if x[0] > x[1] else 1 for x in prediction]
 
 
 
 
 if __name__ == '__main__':
     import load_files
-    import eval
-    import CrossValidation
+    import utils
+    import timeit
+
+    start = timeit.default_timer()
+
+
 
     wine, wine_headers = load_files.load_wine()
     X = wine[:, :-1]
     y = wine[:, -1]
 
     #print(X.shape, y.shape)
-    model = LDA(0,0)
-    print(CrossValidation.CrossValidation(wine, model, 5))
+    model = LDA(0,0,0,0)
+    print(utils.CrossValidation(wine, model, 5))
     # model.fit(X, y)
+    stop = timeit.default_timer()
 
+    print('Time: ', stop - start)
     #print(eval.evaluate_acc(y, model.predict(X)))
     #test with sklearn
     # clf = LinearDiscriminantAnalysis()
