@@ -38,7 +38,7 @@ class Logistic:
             # zero because it's 1+z.
             z = np.exp(x)
             return z / (1 + z)   
-    def fit(self, X, y, iterations, lr,lr_func, threshold, lamb = 0.):
+    def fit(self, X, y, iterations, lr,lr_func, threshold, lamb = 0):
         """
         Parameters
         ----------
@@ -59,9 +59,9 @@ class Logistic:
         """
         X = np.insert(X, 0, 1, axis=1)
 
-        #assert(n == y.shape[0], "the data and output array shapes are not equal")
-
         self.weights = np.random.rand(np.shape(self.weights)[0])
+        #assert(n == y.shape[0], "the data and output array shapes are not equal")
+        
         weights = self.weights
         
         #print(X.shape, y.shape, weights.shape)
@@ -79,7 +79,7 @@ class Logistic:
                 sig = self.sigmoid(np.dot(weights, row.T))
                 sum_ += np.multiply(row, (y[j] - sig))# - self.sign(weights,lamb)
             
-            weights += np.multiply(sum_- lamb*weights, lr_func(lr, i))
+            weights += np.multiply(sum_-lamb*weights, lr_func(lr, i)) 
 
 
             self.weights = weights
@@ -88,6 +88,7 @@ class Logistic:
 
             diff_logodds = np.abs(prev_logodds - log_likelyhood)
             prev_logodds = log_likelyhood
+        #print(self.weights)
         #print('weights: ',self.weights)
     def sign(self, weights,lamb):
         weights = np.copy(weights)

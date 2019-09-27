@@ -5,7 +5,7 @@ import csv
 #breast_cancer_names_path = '../data/breast-cancer-wisconsin.names'
 
 
-def load_wine(wine_data_path ='../data/winequality-red.csv', preprocess = 1):
+def load_wine(wine_data_path ='../data/winequality-red.csv', preprocess = 1,norm = True):
     with open(wine_data_path, 'r') as f:
         wines = list(csv.reader(f, delimiter=';'))
 
@@ -17,11 +17,12 @@ def load_wine(wine_data_path ='../data/winequality-red.csv', preprocess = 1):
                 i[-1] = 1
             else:
                 i[-1] = 0
-    wines[:,:-1] = normalize(np.copy(wines[:,:-1]))
+    if norm:
+        wines[:,:-1] = normalize(np.copy(wines[:,:-1]))
     return wines, wine_headers
 
 
-def load_cancer(breast_cancer_data_path = '../data/breast-cancer-wisconsin.data' , preprocess = 1):
+def load_cancer(breast_cancer_data_path = '../data/breast-cancer-wisconsin.data' , preprocess = 1, norm = True):
     with open(breast_cancer_data_path, 'r') as f:
         cancer = list(csv.reader(f ))
     cancer_headers = ['id number','Clump Thickness','Uniformity of Cell Size','Uniformity of Cell Shape','Marginal Adhesion','Single Epithelial Cell Size','Bare Nuclei','Bland Chromatin','Normal Nucleoli','Mitoses','Class']
@@ -45,7 +46,8 @@ def load_cancer(breast_cancer_data_path = '../data/breast-cancer-wisconsin.data'
                 print('Something weird. Check cancer data.',i)
     # return list into numpy array
     cancer = np.asarray(cancer_good)
-    cancer = normalize(cancer)
+    if norm:
+        cancer = normalize(cancer)
  #   cancer = np.concatenate((cancer, y[np.newaxis:]), axis=1)
 
     return cancer, cancer_headers
