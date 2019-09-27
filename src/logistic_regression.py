@@ -38,7 +38,7 @@ class Logistic:
             # zero because it's 1+z.
             z = np.exp(x)
             return z / (1 + z)   
-    def fit(self, X, y, iterations, lr,lr_func, threshold):
+    def fit(self, X, y, iterations, lr,lr_func, threshold, lamb = 0):
         """
         Parameters
         ----------
@@ -54,6 +54,8 @@ class Logistic:
                 the learning rate ("alpha")
             lr_func: lambda func
                 a function that will be used to update the learning rate at every iteration
+            lamb: float
+                lambda for lasso regularization
         """
         X = np.insert(X, 0, 1, axis=1)
 
@@ -75,9 +77,9 @@ class Logistic:
             sum_ = np.zeros((len(weights),))
             for j,row in enumerate(X):
                 sig = self.sigmoid(np.dot(weights, row.T))
-                sum_ += np.multiply(row, (y[j] - sig)) 
+                sum_ += np.multiply(row, (y[j] - sig))# - self.sign(weights,lamb)
             
-            weights += np.multiply(sum_, lr_func(lr, i))
+            weights += np.multiply(sum_-lamb*weights, lr_func(lr, i)) 
 
 
             self.weights = weights
@@ -86,8 +88,14 @@ class Logistic:
 
             diff_logodds = np.abs(prev_logodds - log_likelyhood)
             prev_logodds = log_likelyhood
-
+        print(self.weights)
         #print('weights: ',self.weights)
+    def sign(self, weights,lamb):
+        weights = np.copy(weights)
+        weights[weights>0] = lamb 
+        weights[weights<0] = -lamb
+        weights[weights==0] = 0.
+        return weights
 
     def predict(self, X, threshhold= 0.5):
         X0 = np.zeros((X.shape[0]))
