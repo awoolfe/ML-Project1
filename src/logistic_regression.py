@@ -38,7 +38,7 @@ class Logistic:
             # zero because it's 1+z.
             z = np.exp(x)
             return z / (1 + z)   
-    def fit(self, X, y, iterations, lr,lr_func):
+    def fit(self, X, y, iterations, lr,lr_func, threshold):
         """
         Parameters
         ----------
@@ -65,7 +65,13 @@ class Logistic:
         #print(X.shape, y.shape, weights.shape)
         #it = 0
         
+        diff_logodds = np.inf
+        prev_logodds = np.inf
+
         for i in range(iterations):
+            if diff_logodds < threshold:
+                break
+
             sum_ = np.zeros((len(weights),))
             for j,row in enumerate(X):
                 sig = self.sigmoid(np.dot(weights, row.T))
@@ -75,7 +81,12 @@ class Logistic:
 
 
             self.weights = weights
-            #print(self.loglikelyhood(X,y))
+            
+            log_likelyhood = self.loglikelyhood(X,y)
+
+            diff_logodds = np.abs(prev_logodds - log_likelyhood)
+            prev_logodds = log_likelyhood
+
         #print('weights: ',self.weights)
 
     def predict(self, X, threshhold= 0.5):
