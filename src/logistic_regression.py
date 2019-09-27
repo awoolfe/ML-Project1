@@ -88,7 +88,7 @@ class Logistic:
 
             diff_logodds = np.abs(prev_logodds - log_likelyhood)
             prev_logodds = log_likelyhood
-        print(self.weights)
+        #print(self.weights)
         #print('weights: ',self.weights)
     def sign(self, weights,lamb):
         weights = np.copy(weights)
