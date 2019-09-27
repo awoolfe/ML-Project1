@@ -43,10 +43,9 @@ class LDA():
         except np.linalg.LinAlgError:
             print("matrix not invertible!")
         else:
-            w0 = np.log((probY_1 / probY_0)) - (0.5) * np.transpose(mean_1).dot(cov_inv).dot(mean_1) + (0.5) * (np.transpose(mean_0)).dot(cov_inv).dot(mean_0)
-            w = cov_inv.dot(mean_1 - mean_0)
-            self.w0 = w0
-            self.w = w
+            self.w0 = np.log((probY_1 / probY_0)) - (0.5) * np.transpose(mean_1).dot(cov_inv).dot(mean_1) + (0.5) * (np.transpose(mean_0)).dot(cov_inv).dot(mean_0)
+            self.w = cov_inv.dot(mean_1 - mean_0)
+
 
 
 
@@ -58,65 +57,28 @@ class LDA():
         #print(y)
         return y
 
-    def bayesPred(self, X, pClass, y):
-        '''calculate mean vector for each class'''
-        X_0 = np.array([row for i, row in enumerate(X) if y[i] == 0])
-        X_1 = np.array([row for i, row in enumerate(X) if y[i] == 1])
-        mean_0 = np.mean(X_0, axis=0)
-        mean_1 = np.mean(X_1, axis=0)
-        means = [mean_0, mean_1]
-        '''compute the covariance matrix'''
-        # covariance = np.cov(np.transpose(X))
-        covariance = np.zeros((X.shape[1], X.shape[1]))
-        N_0 = np.count_nonzero(y == 0)
-        # instances y=1
-        N_1 = np.count_nonzero(y == 1)
-        total = N_0 + N_1
-        for k in [0, 1]:
-            for i, row in enumerate(X):
-                if y[i] == k:
-                    # print(np.shape(np.transpose(row-means[k])))
-                    covariance += np.multiply((row - means[k]), ((row - means[k])[np.newaxis]).T)
-        covariance = covariance / (total - 2)
-        # print(np.shape(covariance))
 
-        probY = 0
-        if pClass == 0:
-            probY = N_0 / (total)
-            mean = mean_0
-
-        else:
-            probY = N_1 / (total)
-            mean = mean_0
-
-
-        try:
-            cov_inv = np.linalg.inv(covariance)
-        except np.linalg.LinAlgError:
-            print("matrix not invertible!")
-        else:
-            w0 = np.log((probY)) - (0.5) * np.transpose(mean).dot(cov_inv).dot(mean) + (
-                np.transpose(mean_0)).dot(cov_inv).dot(mean_0)
-            w = cov_inv.dot(mean_1 - mean_0)
-            self.w0 = w0
-            self.w = w
 
 if __name__ == '__main__':
     import load_files
-    import eval
-    import CrossValidation
+    import utils
+    import timeit
+
+    start = timeit.default_timer()
 
     wine, wine_headers = load_files.load_wine()
     X = wine[:, :-1]
     y = wine[:, -1]
 
-    #print(X.shape, y.shape)
-    model = LDA(0,0)
-    print(CrossValidation.CrossValidation(wine, model, 5))
+    # print(X.shape, y.shape)
+    model = LDA(0, 0)
+    print(utils.CrossValidation(wine, model, 5))
     # model.fit(X, y)
+    stop = timeit.default_timer()
 
-    #print(eval.evaluate_acc(y, model.predict(X)))
-    #test with sklearn
+    print('Time: ', stop - start)
+    # print(eval.evaluate_acc(y, model.predict(X)))
+    # test with sklearn
     # clf = LinearDiscriminantAnalysis()
     # clf.fit(X, y)
     # print(clf.score(X,y))

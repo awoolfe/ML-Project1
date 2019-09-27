@@ -105,19 +105,17 @@ class Logistic:
 
 if __name__ == '__main__':
     import load_files
-    import CrossValidation
-    wine,wine_headers = load_files.load_wine()
-    X = wine[:,:-1]
-    y = wine[:,-1]
-    print(X.shape, y.shape)
-    model = Logistic(X.shape[1])
-    #print(CrossValidation.CrossValidation(wine, model, 5))
+    import utils
+    wines, wine_headers = load_files.load_wine()
+    model = Logistic(wines.shape[1])
+    params1 = [1000, 0.004, lambda x, y: x]
+    print(utils.CrossValidation(wines.copy(), model, 5, params1))
 
-    cancer, cancer_header = load_files.load_cancer()
-
-    x = cancer[:,:-1]
-    model2 = Logistic(x.shape[1], 1000)
-    print(CrossValidation.CrossValidation(cancer, model2, 5))
-    
+    # cancer, cancer_header = load_files.load_cancer()
+    #
+    # x = cancer[:,:-1]
+    # model2 = Logistic(x.shape[1], 1000)
+    # print(utils.CrossValidation(cancer, model2, 5))
+    #
 
 

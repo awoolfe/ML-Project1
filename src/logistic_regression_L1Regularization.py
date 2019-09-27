@@ -3,18 +3,14 @@ from scipy.special import expit
 import numpy as np
 
 
-class LogisticRegular:
-    def __init__(self, params, iterations, lr, lr_func, lam):
+class Logistic:
+    def __init__(self, params):
         """
         initialize random weights
         params is the number of parameters
         iterations is how many time we do gradiant descent
         """
         self.weights = np.random.rand(params)
-        self.iterations = iterations
-        self.lr = lr
-        self.lr_func = lr_func
-        self.lam = lam
 
     #    def sigmoid(self,z):
     #        """
@@ -28,7 +24,7 @@ class LogisticRegular:
 
         for i in range(len(X)):
             sig = self.sigmoid(np.dot(weights.T, X[i]))
-            sum_ += y[i] * np.log(sig) + (1 - y[i]) * np.log(1 - sig) + self.lam*(self.sign(weights))
+            sum_ += y[i] * np.log(sig) + (1 - y[i]) * np.log(1 - sig)
         return sum_
 
     def sigmoid(self, x):
@@ -45,7 +41,7 @@ class LogisticRegular:
             z = np.exp(x)
             return z / (1 + z)
 
-    def fit(self, X, y):
+    def fit(self, X, y, iterations, lr, lr_func):
         """
         Parameters
         ----------
@@ -53,40 +49,37 @@ class LogisticRegular:
             The data
         Y: np.array (m x 1))
             The training output data were fitting to
-        lr: float
-            the learning rate ("alpha")
 
+        params: List
+            iterations: int
+                the number of iterations to run the fit function
+            lr: float
+                the learning rate ("alpha")
+            lr_func: lambda func
+                a function that will be used to update the learning rate at every iteration
         """
         X = np.insert(X, 0, 1, axis=1)
 
+        self.weights = np.random.rand(np.shape(self.weights)[0])
         # assert(n == y.shape[0], "the data and output array shapes are not equal")
 
-        self.weights = np.random.rand(np.shape(self.weights)[0])
         weights = self.weights
 
-        #print(X.shape, y.shape, weights.shape)
+        # print(X.shape, y.shape, weights.shape)
         # it = 0
-        #print(weights)
-        for i in range(self.iterations):
+
+        for i in range(iterations):
             sum_ = np.zeros((len(weights),))
             for j, row in enumerate(X):
                 sig = self.sigmoid(np.dot(weights, row.T))
                 sum_ += np.multiply(row, (y[j] - sig))
 
-
-            weights += np.multiply(sum_, self.lr_func(self.lr, i))
-            # for k in weights:
-            #     k += self.lam*(self.sign(k))
+            weights += np.multiply(sum_, lr_func(lr, i))
+            for k in weights:
+                k = self.soft_threshold(k, 10)
             self.weights = weights
             # print(self.loglikelyhood(X,y))
-        print('weights: ',self.weights)
-
-    def sign(self, weights):
-        #print(weights)
-        weights[weights<0] = -1
-        weights[weights>0] = 1
-        #print(weights)
-        return weights
+        # print('weights: ',self.weights)
 
     def predict(self, X, threshhold=0.5):
         X0 = np.zeros((X.shape[0]))
@@ -102,22 +95,27 @@ class LogisticRegular:
         # else:
         #    return 0
 
+    def soft_threshold(self, rho, lamda):
+        '''Soft threshold function used for normalized data and lasso regression'''
+        if rho < - lamda:
+            return (rho + lamda)
+        elif rho > lamda:
+            return (rho - lamda)
+        else:
+            return 0
 
 if __name__ == '__main__':
     import load_files
-    import CrossValidation
+    import utils
 
     wines, wine_headers = load_files.load_wine()
-    #X = wines[:, :-1]
-    #y = wines[:, -1]
-    #print(X.shape, y.shape)
-    model = LogisticRegular(wines.shape[1], 1000, 0.004, (lambda x, y: x), 0.1)
-    print(CrossValidation.CrossValidation(wines, model, 5))
+    model = Logistic(wines.shape[1])
+    params1 = [1000, 0.004, lambda x, y: x]
+    print(utils.CrossValidation(wines.copy(), model, 5, params1))
 
     # cancer, cancer_header = load_files.load_cancer()
     #
-    # x = cancer[:, :-1]
-    # model2 = LogisticRegular(x.shape[1], 1000)
-    # print(CrossValidation.CrossValidation(cancer, model2, 5))
-    #
+    # x = cancer[:,:-1]
+    # model2 = Logistic(x.shape[1], 1000)
+    # print(utils.CrossValidation(cancer, model2, 5))
     #
