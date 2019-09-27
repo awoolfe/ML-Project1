@@ -49,14 +49,14 @@ def get_uncorrelated_dataset(data,data_headers, threshold = 0.6):
 #   save the headers which we want to remove
     headers_to_rem = []
     s = set(data_headers)
-    print('d: ', d)
+    #print('d: ', d)
     for key, value in d.items():
         if len(value) > 0:
             headers_to_rem.append(data_headers[key])
         #for i in value:
         #    headers_to_rem.append(i)
     headers_to_rem = set(headers_to_rem)
-    print('to remove: ', headers_to_rem)
+    #print('to remove: ', headers_to_rem)
     #remove the headers and store index of uncorrelated items
     #this includes the last column with the classification
     indeces_to_keep = []
@@ -104,7 +104,7 @@ def main():
     model_linear_regression_wine2 = logistic_regression.Logistic(wines.shape[1])
     params2 = [1000, 0.004, (lambda x, y: x / np.round(np.log10(y), 0) if y > 10 else x), 0.5]
 
-    # Experiments of different learning rates
+    #Experiments of different learning rates
     print('*******Learning Rates and Functions  x = learning rate y = step# *******')
     print('Learning rate:0.01; function (x,y)=> x')
     print('wine: %s' % CrossValidation(wines, model_logistic_regression_wine1, 5, params1))
@@ -161,11 +161,19 @@ def main():
     print(acc)
 
     print("*******Testing different feature set on the wine data set using logistic regression******")
+    print('All features')
     print(wine_headers)
-    print('wine: %s' % CrossValidation(wines, model_logistic_regression_wine1, 5, params4))
+    acc = 0.
+    for i in range(5):
+        acc += CrossValidation(wines, model_logistic_regression_wine1, 5, params4)
+    print('Average accuracy of 25 runs of the algorithm: {}'.format(acc/5))
 
+    print("Uncorrelated features")
     print(uncorr_headers)
-    print('wine: %s' % CrossValidation(uncorr_wines, model_logistic_regression_uncorr_wine, 5, params4))
+    acc = 0.
+    for i in range(5):
+        acc += float(CrossValidation(uncorr_wines, model_logistic_regression_uncorr_wine, 5, params4))
+    print('Average accuracy of 25 runs of the algorithm: {}'.format(acc/5))
 
 if __name__ == '__main__':
     main()
