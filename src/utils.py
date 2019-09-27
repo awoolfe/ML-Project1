@@ -4,6 +4,7 @@ sys.path.append('/Users/ianbenlolo/Desktop/Mcgill/comp_551/ML-Project1/')
 import load_files
 import Linear_discriminant_analysis
 import logistic_regression
+#import logistic_regression_L1Regularization as logistic_regression
 import time
 import numpy as np
 # This is where we evaluate the accuracy of our models
@@ -66,8 +67,47 @@ def get_uncorrelated_dataset(data,data_headers, threshold = 0.6):
     #return the array containing only the uncorrelated params
     return  np.take(data, sorted(indeces_to_keep),axis = 1)
 
+def add_features(data):
+        """
+        squares all the features and appends
+        """
+        data = np.copy(data)
+        
+        shape0 = data.shape[0]
+        shape1 = data.shape[1]
+
+        data_augmented = np.zeros((shape0, shape1*2-1))
+
+        #add the current data to the first half and the squared data to the second half
+        data_augmented[:, :shape1-1] = data[:,:-1]
+        data_augmented[:,shape1-1:-1] = data[:,:-1]**2
+        data_augmented[:,-1] = data[:,-1]
+
+        return data_augmented
+def run_and_plot_crossvalidation(data,model,params):
+    
+    import matplotlib
+    matplotlib.use('agg')
+
+    import matplotlib.pyplot as plt
+
+    results_accuracy = []
+    splits = [i for i in range(1,len(data)-1,15 )]
+    for i in splits:
+        print('split: ',i)
+        acc = CrossValidation(data.copy(),model,i,params)
+        results_accuracy.append(acc)
+    
+    print(splits,results_accuracy)
+    fig = plt.figure(figsize = (15,12))
+    plt.scatter(splits,results_accuracy)
+    plt.xlabel('Splits')
+    plt.ylabel('Accuracy of LDA.')
+    fig.savefig('./fig.png')
+
 
 def CrossValidation(data, model, fold, params = None):
+    np.random.shuffle(data)
     folds = np.array_split(data, fold, axis=0)  # we separate the data set into k different sub lists
     accuracy = 0
     for i in range(fold):
@@ -75,9 +115,7 @@ def CrossValidation(data, model, fold, params = None):
         for j in range(fold):
             if j != i:
                 trainingset = np.concatenate((trainingset, folds[j]))  # we create our training set by adding everysub lists except the ith one used for validation
-        if params is not None:
-            assert(len(params) == 3, 'params should have iterations, lr, lr_func')
-        else:
+        if params is  None:
             params = []
         model.fit(trainingset[:,:-1], trainingset[:,-1], *params)  # train the model with the training set
 
@@ -87,33 +125,35 @@ def CrossValidation(data, model, fold, params = None):
 
 def main():
     wines, wine_headers = load_files.load_wine()
-    cancer = load_files.load_cancer()
-    print('wines pre uncorrelation: ', wines.shape)
+    cancer,cancer_headers = load_files.load_cancer()
+    
     ## testing uncorrelated data only
     wines = get_uncorrelated_dataset(wines,wine_headers)
-    print('wines post uncorrelation: ', wines.shape)
-    print(wines)
-
+    cancer = get_uncorrelated_dataset(cancer,cancer_headers)
+    
+    wines = add_features(wines)
     model_lda_wine1 = Linear_discriminant_analysis.LDA(0,0)
     
 
-    model_linear_regression_wine1 = logistic_regression.Logistic(wines.shape[1])
-    params1 = [1000, 0.004, lambda x, y: x, 0.05]
+    model_lr_wine1 = logistic_regression.Logistic(wines.shape[1])
+    params1 = [100, 0.004, lambda x, y: x, 0.5,0.4]
 
 
-    model_linear_regression_wine2 = logistic_regression.Logistic(wines.shape[1])
+    model_lr_wine2 = logistic_regression.Logistic(wines.shape[1])
     params2 = [1000, 0.004,  lambda x, y: x/np.round(np.log10(y),0) if y > 10 else x, 0.5]
 
     print('*******Runtime and accuracy of our models*******')
     print('Linear Discriminant Analysis')
     start_time = time.time()
+
     acc = CrossValidation(wines.copy(), model_lda_wine1, 5)
     print(time.time() - start_time)
     print(acc)
 
     print('\nLinear regression: 1000 steps, learning rate 0.004 ')
     start_time = time.time()
-    acc = CrossValidation(wines.copy(), model_linear_regression_wine1, 5, params1)
+    run_and_plot_crossvalidation(wines.copy(), model_lr_wine1, params1)
+    #acc = CrossValidation(wines.copy(), model_lr_wine1, 5, params1)
     print(time.time() - start_time)
     print(acc)
 
