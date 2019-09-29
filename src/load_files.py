@@ -49,6 +49,7 @@ def load_cancer(breast_cancer_data_path = '../data/breast-cancer-wisconsin.data'
     if norm:
         cancer = normalize(cancer)
  #   cancer = np.concatenate((cancer, y[np.newaxis:]), axis=1)
+    print(np.shape(cancer))
 
     return cancer, cancer_headers
 

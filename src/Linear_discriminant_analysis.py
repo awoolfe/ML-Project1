@@ -26,7 +26,7 @@ class LDA():
         mean_1 = np.mean(X_1, axis=0)
         means = [mean_0, mean_1]
         '''compute the covariance matrix'''
-        #covariance = np.cov(np.transpose(X))
+        covariance = np.cov(np.transpose(X))
         covariance = np.zeros((X.shape[1], X.shape[1]))
 
         for k in [0,1]:

@@ -1,17 +1,17 @@
 import sys
 sys.path.append('/Users/ianbenlolo/Desktop/Mcgill/comp_551/ML-Project1/')
-
 import load_files
 import Linear_discriminant_analysis
 import logistic_regression
 import time
 import numpy as np
+import matplotlib.pyplot as plt
 # This is where we evaluate the accuracy of our models
 # Input:
 # target_y : result that we wish to obtain based on real data
 # true_y : results obtained by the model
 
-iterations = []
+
 def evaluate_acc(target_y, true_y):
     correct_labels = 0
     if len(target_y) != len(true_y):  # to prevent indexing exceptions
@@ -68,7 +68,7 @@ def get_uncorrelated_dataset(data,data_headers, threshold = 0.6):
 
 
 def CrossValidation(data, model, fold, params = None):
-    np.random.shuffle(data)  # last step of preprocessing
+    # np.random.shuffle(data)  # last step of preprocessing
     folds = np.array_split(data, fold, axis=0)  # we separate the data set into k different sub lists
     accuracy = 0
     for i in range(fold):
@@ -89,8 +89,6 @@ def CrossValidation(data, model, fold, params = None):
 def main():
     wines, wine_headers = load_files.load_wine()
 
-
-
     ## testing uncorrelated data only
     uncorr_wines, uncorr_headers = get_uncorrelated_dataset(wines,wine_headers)
     cancer, cancer_headers = load_files.load_cancer()
@@ -101,41 +99,52 @@ def main():
     model_logistic_regression_cancer1 = logistic_regression.Logistic(cancer.shape[1])
     model_logistic_regression_wine1 = logistic_regression.Logistic(wines.shape[1])
     model_logistic_regression_uncorr_wine = logistic_regression.Logistic(uncorr_wines.shape[1])
-    params1 = [10000, 0.005, (lambda x, y: x), 0.1]
+    params1 = [1000, 0.01, (lambda x, y: x), 0.5]
 
     model_linear_regression_wine2 = logistic_regression.Logistic(wines.shape[1])
-    params2 = [10000, 0.0005, (lambda x, y: x / np.round(np.log10(y), 0) if y > 10 else x), 0.1]
+    params2 = [1000, 0.004, (lambda x, y: x / np.round(np.log10(y), 0) if y > 10 else x), 0.5]
+
+    '''for plotting'''
+    winelr = []
+    breastlr = []
+    xax = [0.0001, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05]
+    best = [0.001, 0.015, 0.002, 0.0025, 0.003, 0.0035, 0.004, 0.0045]
 
     #Experiments of different learning rates
     print('*******Learning Rates and Functions  x = learning rate y = step# *******')
-    print('Learning rate:0.005; function (x,y)=> x')
-    print('wine: %s' % CrossValidation(wines, model_logistic_regression_wine1, 5, params1))
-    print('cancer: %s' % CrossValidation(cancer, model_logistic_regression_cancer1, 5, params1))
-    print('Learning rate:0.001; function (x,y)=> x')
-    params3 = [10000, 0.001, (lambda x, y: x), 0.1]
-    print('wine: %s' % CrossValidation(wines, model_logistic_regression_wine1, 5, params3))
-    print('cancer: %s' % CrossValidation(cancer, model_logistic_regression_cancer1, 5, params3))
-    print('Learning rate:0.0005; function (x,y)=> x')
-    params4 = [10000, 0.0005, (lambda x, y: x), 0.1]
-    print('wine: %s' % CrossValidation(wines, model_logistic_regression_wine1, 5, params4))
-    print('cancer: %s' % CrossValidation(cancer, model_logistic_regression_cancer1, 5, params4))
-    print('Learning rate:0.0001; function (x,y)=> x')
-    params5 = [10000, 0.0001, (lambda x, y: x), 0.1]
-    print('wine: %s' % CrossValidation(wines, model_logistic_regression_wine1, 5, params5))
-    print('cancer: %s' % CrossValidation(cancer, model_logistic_regression_cancer1, 5, params5))
-    print('Learning rate:0.004; function (x,y)=> x')
-    params6 = [10000, 0.0005, (lambda x, y: x), 0.1]
-    print('wine: %s' % CrossValidation(wines, model_logistic_regression_wine1, 5, params6))
-    print('cancer: %s' % CrossValidation(cancer, model_logistic_regression_cancer1, 5, params6))
-    print('Learning rate:0.004; function (x,y)=> x/log_10(y) if y > 10 else x')
-    print('wine: %s' % CrossValidation(wines, model_logistic_regression_wine1, 5, params2))
-    print('cancer: %s' % CrossValidation(cancer, model_logistic_regression_cancer1, 5, params2))
-    print('Learning rate:0.0005; function (x,y)=> 10x/y')
-    params7 = [10000, 0.0005, (lambda x, y: 10 * x / (y + 1)), 0.1]
-    print('wine: %s' % CrossValidation(wines, model_logistic_regression_wine1, 5, params7))
-    print('cancer: %s' % CrossValidation(cancer, model_logistic_regression_cancer1, 5, params7))
 
-    print(iterations)
+    for i in best:
+        print('Learning rate: ' + str(i) + '; function (x,y)=>x')
+        params = [1000, i, (lambda x, y: x), 0.5]
+        lrw = CrossValidation(wines, model_logistic_regression_wine1, 5, params)
+        lrb = CrossValidation(cancer, model_logistic_regression_cancer1, 5, params)
+        winelr.append(lrw*100)
+        breastlr.append(lrb*100)
+        print('wine: %s' % lrw)
+        print('cancer: %s' % lrb)
+
+    params4 = [1000, 0.0025, (lambda x, y: x), 0.5]
+
+    # print('Learning rate:0.004; function (x,y)=> x/log_10(y) if y > 10 else x')
+    # print('wine: %s' % CrossValidation(wines, model_logistic_regression_wine1, 5, params2))
+    # print('cancer: %s' % CrossValidation(cancer, model_logistic_regression_cancer1, 5, params2))
+    # print('Learning rate:0.004; function (x,y)=> 10x/y')
+    # params7 = [1000, 0.004, (lambda x, y: 10 * x / (y + 1)), 0.5]
+    # print('wine: %s' % CrossValidation(wines, model_logistic_regression_wine1, 5, params7))
+    # print('cancer: %s' % CrossValidation(cancer, model_logistic_regression_cancer1, 5, params7))
+    '''plot learning rate vs accuracy'''
+    '''wine'''
+    plt.xlabel('Learning rate')
+    plt.ylabel('Percent accuracy')
+    plt.title('Learning rate vs Accuracy for Wine Data Set')
+    plt.plot(best, winelr, 'ro')
+    plt.show()
+    '''breast cancer'''
+    plt.xlabel('Learning rate')
+    plt.ylabel('Percent accuracy')
+    plt.title('Learning rate vs Accuracy for Cancer Data Set')
+    plt.plot(best, breastlr, 'go')
+    plt.show()
 
     print('*******Runtime and accuracy of our models*******')
     print("Dataset Wine")
@@ -145,23 +154,26 @@ def main():
     print(time.time() - start_time)
     print(acc)
 
-    print('\nLinear regression: 1000 steps, learning rate 0.001 ')
+    print('\nLinear regression: 1000 steps, learning rate 0.0025 ')
     start_time = time.time()
     acc = CrossValidation(wines.copy(), model_logistic_regression_wine1, 5, params4)
     print(time.time() - start_time)
     print(acc)
 
     print('Dataset Cancer')
+    print('Linear Discriminant Analysis')
     start_time = time.time()
     acc = CrossValidation(cancer.copy(), model_lda_cancer1, 5)
     print(time.time() - start_time)
     print(acc)
 
-    print('\nLinear regression: 1000 steps, learning rate 0.0005 ')
+    print('\nLinear regression: 1000 steps, learning rate 0.0025 ')
     start_time = time.time()
     acc = CrossValidation(cancer.copy(), model_logistic_regression_cancer1, 5, params4)
     print(time.time() - start_time)
     print(acc)
+
+
 
     print("*******Testing different feature set on the wine data set using logistic regression******")
     print('All features')
@@ -170,6 +182,7 @@ def main():
     for i in range(5):
         acc += CrossValidation(wines, model_logistic_regression_wine1, 5, params4)
     print('Average accuracy of 25 runs of the algorithm: {}'.format(acc/5))
+
     print("Uncorrelated features")
     print(uncorr_headers)
     acc = 0.
